@@ -52,33 +52,6 @@ rhoi_mag = abs(rhoiF/L);
 rhoi_angle = angle(rhoiF/L);
 
 
-
-
-
-
-
-%% %%%%%%%%%%% Gráfica de la señal sintetizada
-% rho_r=0;
-% rho_r=rho_r+rhoi_mag(1).*cos(2*pi*f(1).*t+rhoi_angle(1));
-% subplot(1,2,1),title(['harmonics: ', num2str(0)])
-% h=plot(theta_i,rho_r,'r--');
-% subplot(1,2,2)
-% h2=polar(theta_i,rho_r,'r');
-% pause(2)
-% delete(h)
-% delete(h2)
-
-% for i=2:n/2
-% rho_r=rho_r+rhoi_mag(i)*2.*cos(2*pi*f(i).*t+rhoi_angle(i));
-% subplot(1,2,1),title(['harmonics: ', num2str(i-1)])
-% h=plot(theta_i,rho_r,'r--');
-% subplot(1,2,2)
-% h2=polar(theta_i,rho_r,'r');
-% pause(2)
-% delete(h)
-% delete(h2)
-% end
-
 %% %%%%%%%%%%% Gráfica de reconstrucción animada
 figure,
 ax1=subplot(1,2,1);
@@ -86,20 +59,115 @@ hold on,
 ax2=subplot(1,2,2);
 plot(theta_i,rho_i,'b'),
 hold on,
-xlim([min(theta_i),max(theta_i)])
-ylim([mini,maxi])
+% xlim([min(theta_i),max(theta_i)])
+% ylim([mini,maxi])
 set(gcf ,'units','normalized')
 set(gcf ,'position',[0.0702    0.5057    0.5958    0.3962])
 
 rho_r=0;
-rho_r=rho_r+rhoi_mag(1).*cos(2*pi*f(1).*t+rhoi_angle(1));
 
-harmonic=2;
-p=rhoiF(harmonic).*exp(-1i*2*pi*f(harmonic).*t);
-p_real=real(p);
-p_imag=imag(p);
-[angle,mag]=cart2pol(p_real,p_imag);
-rho_r=rho_r+rhoi_mag(2)*cos(2*pi*f(2).*t-rhoi_angle(2));
+nhar=5;
+phasorcell={nhar-1,4};
+for har=2:nhar
+    rho_e=rhoiF(har).*exp(-1i*2*pi*f(har).*t);
+    rho_real=real(rho_e);
+    rho_imag=imag(rho_e);
+    [angle,mag]=cart2pol(rho_real,rho_imag);
+    phasorcell{har-1,1}=rho_real;
+    phasorcell{har-1,2}=rho_imag;
+    phasorcell{har-1,3}=angle;
+    phasorcell{har-1,4}=mag;
+end 
+close all
+figure,
+hold on,
+xlim([-50,50])
+ylim([-50,50])
+for i=1:length(rho_real)
+    xp=0;yp=0;
+    for har=2:nhar
+    x=phasorcell{har-1,4}(i)*cos(phasorcell{har-1,3}(i));
+    y=phasorcell{har-1,4}(i)*sin(phasorcell{har-1,3}(i));
+    yc=yp+y; xc=xp+x;
+    l(har-1)=plot([yp,yc],[xp,xc],'k');
+    l2(har-1)=plot(yp+phasorcell{har-1,2},xp+phasorcell{har-1,1},'k');
+    yp=yc; xp=xc;
+    end
+    drawnow
+    delete(l)
+    delete(l2)
+end
+return
+figure,
+hold on,
+
+
+
+i
+
+
+
+
+for har=2:128
+    rho_e=rhoiF(har).*exp(-1i*2*pi*f(har).*t);
+    rho_r=rho_r+rhoi_mag(har)*.2.*cos(2*pi*f(har).*t-rhoi_angle(har));
+    rho_real=real(rho_e);
+    rho_imag=imag(rho_e);
+    [angle,mag]=cart2pol(rho_real,rho_imag);
+    subplot(1,2,1)
+    for i=1:length(rho_real)
+    plot(rho_imag(i),rho_real(i),'.r');
+    end
+    for i=1:length(rho_real)
+    x=mag(i)*cos(angle(i));
+    y=mag(i)*sin(angle(i));
+    l=quiver(0,0,y,x,'b');
+    set(l,'AutoScaleFactor',1.01)
+    drawnow
+    delete(l)
+    end
+%     
+%     for i=1:length(rho_real)
+%     plot(rho_imag(i),rho_real(i),'.r');
+%     subplot(1,2,1)
+%     plot(rho_imag(i),rho_real(i),'.r');
+%     [xa1,ya1] = ds2nfu(ax1,rho_imag(i),rho_real(i));
+%     x=mag(i)*cos(angle(i));
+%     y=mag(i)*sin(angle(i));
+%     l=quiver(0,0,y,x,'b');
+%     set(l,'AutoScaleFactor',1.01)
+%     subplot(1,2,2)
+%     plot(theta_i(i),rho_r(i),'.r')
+%     [xa2,ya2] = ds2nfu(ax2,theta_i(i),rho_r(i));
+%     xl = [xa1, xa2];
+%     yl = [ya1,  ya2];
+%     an=annotation('line',xl,yl);
+%     drawnow
+%     delete(an)
+%     delete(l)
+%     end
+%     subplot(1,2,1)
+%     xlim([min(theta_i),max(theta_i)])
+%     ylim([mini,maxi])
+%     plot(p_imag(i),p_real(i),'.r');
+%     [xa1,ya1] = ds2nfu(ax1,p_imag(i),p_real(i));
+%     x=mag(i)*cos(angle(i))/L;
+%     y=mag(i)*sin(angle(i))/L;
+%     l=quiver(0,0,y,x,'b');
+%     set(l,'AutoScaleFactor',1.01)
+%     subplot(1,2,2)
+%     plot(theta_i(i),rho_r(i),'.r')
+%     [xa2,ya2] = ds2nfu(ax2,t(i),recupera(i));
+%     xl = [xa1, xa2];
+%     yl = [ya1,  ya2];
+%     an=annotation('line',xl,yl);
+    drawnow
+    
+    
+end
+
+
+
 for har=2:128
     ax2=subplot(1,2,2);
     hold off

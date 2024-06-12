@@ -53,40 +53,58 @@ rhoi_angle = angle(rhoiF/L);
 
 
 %% %%%%%%%%%%% Cálculo de fasores
-rho_r=0;
-nhar=7;
+nhar=5;
 phasorcell={nhar-1,4};
+rho_r=0;
+rho_r=rho_r+rhoi_mag(1).*cos(2*pi*f(1).*t+rhoi_angle(1));
+
 for har=2:nhar
-    rho_e=rhoiF(har).*exp(-1i*2*pi*f(har).*t)./128;
+    rho_e=rhoiF(har).*exp(1i*2*pi*f(har).*t)./128;
     rho_real=real(rho_e);
     rho_imag=imag(rho_e);
+    rho_r=rho_r+rhoi_mag(har).*2.*cos(2*pi*f(har).*t+rhoi_angle(har));
     [angle,mag]=cart2pol(rho_real,rho_imag);
     phasorcell{har-1,1}=rho_real;
     phasorcell{har-1,2}=rho_imag;
     phasorcell{har-1,3}=angle;
     phasorcell{har-1,4}=mag;
-end 
+end
 
 %% %%%%%%%%%%% Gráfica de fasores
 
-figure('Color',[1 1 1]),
-hold on,
-xlim([-1,1])
-ylim([-0.3,0.8])
+figure('Color',[1 1 1])
+set(gcf ,'units','normalized')
+set(gcf ,'position',[0.0339    0.3952    0.9155    0.5067])
+ax1=subplot(1,2,1); hold on,
+xlim([-1,1]), ylim([-0.3,0.8])
+ax2=subplot(1,2,2);
+hold on, ylim([-0.3,0.8])
+plot(theta_i,rho_i)
+
 for i=1:length(rho_real)
     xp=0;yp=0;
+    subplot(1,2,1)
     for har=2:nhar
-    x=phasorcell{har-1,4}(i)*cos(phasorcell{har-1,3}(i));
-    y=phasorcell{har-1,4}(i)*sin(phasorcell{har-1,3}(i));
-    yc=yp+y; xc=xp+x;
-    l(har-1)=plot([yp,yc],[xp,xc],'k');
-    l2(har-1)=plot(yp+phasorcell{har-1,2},xp+phasorcell{har-1,1},'k');
-    yp=yc; xp=xc;
+        x=phasorcell{har-1,4}(i)*cos(phasorcell{har-1,3}(i));
+        y=phasorcell{har-1,4}(i)*sin(phasorcell{har-1,3}(i));
+        yc=yp+y; xc=xp+x;
+        
+        l(har-1)=plot([yp,yc],[xp,xc],'k');
+        l2(har-1)=plot(yp+phasorcell{har-1,2},xp+phasorcell{har-1,1},'k');
+        yp=yc; xp=xc;
     end
-%     plot(yp,xp,'r.')
+    subplot(1,2,2)
+    plot(theta_i(i),rho_r(i),'r.')
+    [xa1,ya1] = ds2nfu(ax1, yc,xc);
+    [xa2,ya2] = ds2nfu(ax2,theta_i(i),rho_r(i));
+    xl = [xa1, xa2];
+    yl = [ya1,  ya2];
+    an=annotation('line',xl,yl);
     drawnow
+    pause(0.1)
     delete(l)
     delete(l2)
+    delete( an)
 end
 
 
